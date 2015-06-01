@@ -1,0 +1,84 @@
+\documentclass[fleqn]{article}\usepackage[]{graphicx}\usepackage[]{color}
+
+\usepackage{amssymb, amsmath, amsthm, amsfonts}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{paralist}
+\usepackage{natbib}
+\usepackage{enumerate}
+\usepackage{float}
+
+
+\include{GrandMacros}
+\newcommand{\norm}[1]{\vert\vert #1 \vert\vert}
+\newcommand{\ind}{\mathbb{I}}
+
+\title{Review of Inference for Dynamical Systems Models of Infectious Disease}
+\date{}
+\author{Evan L. Ray}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+\label{sec:Intro}
+
+In this document we review basic formulations of models used for infectious disease and inference techniques used to estimate model parameters and make predictions.  In the most basic case, models may focus on explaining observed case counts for a single spatial region and (type of the disease) over time.  These basic models can be extended in several ways:
+\begin{enumerate}
+\item Spatial scale: joint modeling of disease dynamics in multiple spatial regions.
+\item Multiple serotypes: modeling of the interactions among multiple disease serotypes.
+\item Measurement process: modeling of the measurement process.  For instance, we may not observe all disease cases or there may be delays in reporting.
+\end{enumerate}
+
+All of these models may be specified in the framework of one of several different model structures:
+\begin{enumerate}
+\item Compartmental models: These models describe disease dynamics at a population level by partitioning the population of individuals in a geographic region into groups describing their disease status, and describing transitions of individuals between different disease status categories over time.  An example of a model of this type is the SIR (for susceptible-infected-recovered) model.
+\item Poisson Regression: A generalized linear model, where case counts at each time point are modeled as a draw from a Poisson distribution with rate parameter depending on covariates and/or cases at previous time points
+\end{enumerate}
+
+We discuss model formulations in Section \ref{sec:Models}, parameter estimation methods in Section \ref{sec:Estimation}, and prediction in Section \ref{sec:Prediction}.
+
+\section{Compartmental Models}
+\label{sec:CompartmentalModels}
+
+In this Section we discuss variations on compartmental models and estimation strategies for their parameters that have been proposed.  The most common compartmental model is referred to as the SIR model, which stands for Susceptible--Infected--Recovered.  In this model, at each point in time each individual in the population is categorized as either susceptible to the disease, infected with the disease, or recovered from the disease.  The model tracks the total number of individuals in each disease status category, and allows for either deterministic or stochastic changes in these population totals over time.
+
+One approach is to manipulate the equations of the compartmental model so as to obtain an approximately linear form in the observed model quantities, and then use locally linear regression techniques such as local regression or splines.
+
+\cite{finkenstadt2000TimeSeriesDiseasesDynamicalSystems} model transmission of measles and base their work on the SEIR model.  This model has four components: \textbf{S}usceptible, \textbf{E}xposed, \textbf{I}nfected, and \textbf{R}ecovered.  The assumed transitions between these categories are shown in Figure~\ref{fig:FinkenstadtGrenfell2000SEIRDynamics}, which reproduces Figure 1 from their work.  They use the following set of equations to model the infected and susceptible populations over time:
+\begin{align}
+I_t = r_t I_{t - 1}^{\alpha_1} S_{t - 1}^{\alpha_2} \epsilon_t \label{eqn:FinkenstadtGrenfell2000It} \\
+S_t = B_{t - d} + S_{t - 1} - I_t _ u_t \label{eqn:FinkenstadtGrenfell2000St}
+\end{align}
+The model works with data aggregated to a biweekly scale, and previous work indicates that it takes 2 weeks for an infected individual to recover from measles.  This means that (by assumption), all infected individuals at time $t - 1$ are recovered at time $t$.  The authors also incorporate a mechanism for underreporting of the number of infected individuals at each time point, with a time-varying reporting rate.
+
+\lboxit{
+The justification for the particular functional form used in Equation~\eqref{eqn:FinkenstadtGrenfell2000It} is unclear to me.  Is there a way to investigate whether this functional form is reasonable or correct?  See references Liu et al. 1987 and Fine and Clarkson 1982 for discussion?
+}
+
+\begin{figure}
+\includegraphics[width=\textwidth]{images/FinkenstadtGrenfell2000/SEIRDynamics.png} 
+\caption{A reproduction of Figure 1 from \cite{finkenstadt2000TimeSeriesDiseasesDynamicalSystems}.  Original caption: ``Flow diagram of the SEIR compartmental model: S, susceptible; E, exposed; I, infected; R, recovered"}
+\label{fig:FinkenstadtGrenfell2000SEIRDynamics}
+\end{figure}
+
+In order to perform estimation, \cite{finkenstadt2000TimeSeriesDiseasesDynamicalSystems} use a two-step process:
+\begin{enumerate}
+\item First, they use Equation \eqref{eqn:FinkenstadtGrenfell2000St} to obtain an estimate of the deviations of the size of the susceptible population from its long-term mean at each time point.  This step works by rearranging Equation~\eqref{eqn:FinkenstadtGrenfell2000St} to express the cumulative births at each time point as a function of the cumulative observed cases, deviations in the reporting rate from the overall average reporting rate, deviations of the size of the susceptible population at time $t$ from its overall mean, and a random noise term.  They then use locally linear regression to approximate this function locally in $t$.  The terms in this approximation do not uniquely identify all of the quantities in the model; in particular, they use the residuals from this regression as estimates of the desired deviations, but it appears that the deviations of the the size of the susceptible population from their overall mean are conflated with the random noise term.  This would mean that the estimates used are valid only when the random noise term is approximately $0$ (or has very low variance).
+\item Second, they combine the estimated deviations from step 1 with Equation \eqref{eqn:FinkenstadtGrenfell2000It} to estimate the parameters governing infection dynamics over time.
+\end{enumerate}
+
+
+\section{Poisson Regression}
+\label{sec:Prediction}
+
+
+
+%\bibliographystyle{plainnat}
+%\bibstyle{agsm}
+\bibliographystyle{Chicago}
+
+\bibliography{MID}
+
+\end{document}
