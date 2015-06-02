@@ -13,7 +13,7 @@
 \newcommand{\norm}[1]{\vert\vert #1 \vert\vert}
 \newcommand{\ind}{\mathbb{I}}
 
-\title{Review of Inference for Dynamical Systems Models of Infectious Disease}
+\title{Review of (Compartmental) Models for Infectious Disease}
 \date{}
 \author{Evan L. Ray}
 
@@ -24,23 +24,53 @@
 \section{Introduction}
 \label{sec:Intro}
 
-In this document we review basic formulations of models used for infectious disease and inference techniques used to estimate model parameters and make predictions.  In the most basic case, models may focus on explaining observed case counts for a single spatial region and (type of the disease) over time.  These basic models can be extended in several ways:
+In this document we review basic formulations of models used for infectious disease and inference techniques used to estimate the model parameters and make predictions.  These models and estimation strategies can be described by the following five factors:
 \begin{enumerate}
-\item Spatial scale: joint modeling of disease dynamics in multiple spatial regions.
-\item Multiple serotypes: modeling of the interactions among multiple disease serotypes.
-\item Measurement process: modeling of the measurement process.  For instance, we may not observe all disease cases or there may be delays in reporting.
+\item Mechanistic vs. *** (what's a good term?):
+	\begin{itemize}
+	\item Mechanistic models describe the mechanisms governing the dynamics of the disease.  These models can be further divided into agent-based or compartmental models:
+		\begin{itemize}
+		\item Agent-based models describe interactions between individuals within a population.
+		\item Compartmental models divide the population into large groups according to their disease status, and model the number of people in each disease status category over time.
+		\end{itemize}
+	\item *** models do not explicitly seek to describe mechanics of disease transmission.  Instead, they more directly model the number of observed cases at each time function as a function of covariates (possibly including lagged case counts).
+	\end{itemize}
+\item Time framework: Models may work with either
+	\begin{itemize}
+	\item continuous time; or
+	\item discrete time.
+	\end{itemize}
+\item Spatial scale: Models may describe either
+	\begin{itemize}
+	\item dynamics for a single geographic region, such as a country; or
+	\item dynamics for multiple interconnected geographic regions, such as provinces within a country.
+	\end{itemize}
+\item Number of serotypes: Models may describe either
+	\begin{itemize}
+	\item dynamics for a single serotype; or
+	\item dynamics for multiple interacting serotypes.
+	\end{itemize}
+\item Measurement process: Models may incorporate aspects of the measurement process such as
+	\begin{itemize}
+	\item underreporting of case counts
+	\item delays in reporting.
+	\end{itemize}
 \end{enumerate}
 
-All of these models may be specified in the framework of one of several different model structures:
-\begin{enumerate}
-\item Compartmental models: These models describe disease dynamics at a population level by partitioning the population of individuals in a geographic region into groups describing their disease status, and describing transitions of individuals between different disease status categories over time.  An example of a model of this type is the SIR (for susceptible-infected-recovered) model.
-\item Poisson Regression: A generalized linear model, where case counts at each time point are modeled as a draw from a Poisson distribution with rate parameter depending on covariates and/or cases at previous time points
-\end{enumerate}
+In this review, we focus on the compartmental variety of mechanistic models.  A central challenge for estimation of the parameters in these models is that the number of individuals in each disease status category may be either completely unobserved or censored.  This limitation of the observed data is addressed in different ways by different models and estimation strategies.  We list several estimation strategies have been developed for these and similar models here:
+\begin{itemize}
+\item two-stage procedures: the first stage estimates the unobserved quantities which are then used as inputs to the second stage.  These procedures can be used to obtain approximate maximum likelihood parameter estimates(?)
+\item nonlinear programming to maximize an approximation of the likelihood in continuous time models
+%\item forwards-backwards algorithms: for certain model specifications, it is possible to derive computationally efficient algorithms for integrating over the state space; these algorithms are referred to as forward-backward algorithms  (commented out because these methods may not be relevant for SIR type models?)
+\item particle filtering/sequential Monte Carlo: this is a method for performing Monte Carlo integration over all possible values of unobserved variables.  This is a computationally demanding method, but can be used to obtain maximum likelihood parameter estimates (?)
+\item There is an MCMC technique used in maximum likelihood estimation of network model parameters in which the MCMC is used to integrate over all possible network structures -- perhaps something like that could be applied in this setting?
+\item Bayesian or frequentist estimation of splines that approximate the underlying dynamic process -- applied to PDE's from physics context, perhaps could also be applied in this setting?
+\end{itemize}
 
-We discuss model formulations in Section \ref{sec:Models}, parameter estimation methods in Section \ref{sec:Estimation}, and prediction in Section \ref{sec:Prediction}.
+This review is organized as follows.  We discuss variations on the model formulation in Section \ref{sec:ModelFormulation}, drawing exclusively from the literature on modeling infectious disease.  We then discuss estimation strategies for these models in Section \ref{sec:Estimation}; here, we draw from the broader literature on estimation of the parameters in similar dynamical models.
 
-\section{Compartmental Models}
-\label{sec:CompartmentalModels}
+\section{Model Formulation}
+\label{sec:ModelFormulation}
 
 In this Section we discuss variations on compartmental models and estimation strategies for their parameters that have been proposed.  The most common compartmental model is referred to as the SIR model, which stands for Susceptible--Infected--Recovered.  In this model, at each point in time each individual in the population is categorized as either susceptible to the disease, infected with the disease, or recovered from the disease.  The model tracks the total number of individuals in each disease status category, and allows for either deterministic or stochastic changes in these population totals over time.
 
@@ -49,7 +79,7 @@ One approach is to manipulate the equations of the compartmental model so as to 
 \cite{finkenstadt2000TimeSeriesDiseasesDynamicalSystems} model transmission of measles and base their work on the SEIR model.  This model has four components: \textbf{S}usceptible, \textbf{E}xposed, \textbf{I}nfected, and \textbf{R}ecovered.  The assumed transitions between these categories are shown in Figure~\ref{fig:FinkenstadtGrenfell2000SEIRDynamics}, which reproduces Figure 1 from their work.  They use the following set of equations to model the infected and susceptible populations over time:
 \begin{align}
 I_t = r_t I_{t - 1}^{\alpha_1} S_{t - 1}^{\alpha_2} \epsilon_t \label{eqn:FinkenstadtGrenfell2000It} \\
-S_t = B_{t - d} + S_{t - 1} - I_t _ u_t \label{eqn:FinkenstadtGrenfell2000St}
+S_t = B_{t - d} + S_{t - 1} - I_t + u_t \label{eqn:FinkenstadtGrenfell2000St}
 \end{align}
 The model works with data aggregated to a biweekly scale, and previous work indicates that it takes 2 weeks for an infected individual to recover from measles.  This means that (by assumption), all infected individuals at time $t - 1$ are recovered at time $t$.  The authors also incorporate a mechanism for underreporting of the number of infected individuals at each time point, with a time-varying reporting rate.
 
@@ -70,8 +100,8 @@ In order to perform estimation, \cite{finkenstadt2000TimeSeriesDiseasesDynamical
 \end{enumerate}
 
 
-\section{Poisson Regression}
-\label{sec:Prediction}
+\section{Estimation}
+\label{sec:Estimation}
 
 
 
