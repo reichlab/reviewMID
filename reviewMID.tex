@@ -15,7 +15,7 @@
 
 \title{Review of (Compartmental) Models for Infectious Disease}
 \date{}
-\author{Evan L. Ray}
+\author{Evan L. Ray (and anyone else)}
 
 \begin{document}
 
@@ -35,7 +35,7 @@ In this document we review basic formulations of models used for infectious dise
 		\end{itemize}
 	\item *** models do not explicitly seek to describe mechanics of disease transmission.  Instead, they more directly model the number of observed cases at each time function as a function of covariates (possibly including lagged case counts).
 	\end{itemize}
-\item Time framework: Models may work with either
+\item Temporal framework: Models may work with either
 	\begin{itemize}
 	\item continuous time; or
 	\item discrete time.
@@ -69,12 +69,50 @@ In this review, we focus on the compartmental variety of mechanistic models.  A 
 
 This review is organized as follows.  We discuss variations on the model formulation in Section \ref{sec:ModelFormulation}, drawing exclusively from the literature on modeling infectious disease.  We then discuss estimation strategies for these models in Section \ref{sec:Estimation}; here, we draw from the broader literature on estimation of the parameters in similar dynamical models.
 
+\lboxit{
+Incompletely categorized papers: These should probably be discussed in more places than they currently are
+\begin{itemize}
+\item \cite{finkenstadt2000TimeSeriesDiseasesDynamicalSystems}
+\item \cite{ionides2006inferenceNonlinearDynamicalSystems}
+\item \cite{king2008inapparentInfectionsCholera}
+\item \cite{reich2013DengueSerotypeInteractionsCrossImmunity}
+\item \cite{shrestha2011MultiPathogen}
+\item \cite{word2010estimationSeasonalTransmissionContinuousTime}
+\item \cite{word2012nonlinearProgrammingTransmissionParametersContinuousTime}
+\end{itemize}
+}
+
 \section{Model Formulation}
 \label{sec:ModelFormulation}
 
-In this Section we discuss variations on compartmental models and estimation strategies for their parameters that have been proposed.  The most common compartmental model is referred to as the SIR model, which stands for Susceptible--Infected--Recovered.  In this model, at each point in time each individual in the population is categorized as either susceptible to the disease, infected with the disease, or recovered from the disease.  The model tracks the total number of individuals in each disease status category, and allows for either deterministic or stochastic changes in these population totals over time.
+In this Section we discuss variations that have been proposed for compartmental models of infectious disease.  We begin by giving an overview of the Susceptible-Infected-Recovered (SIR) model in Subsection \ref{subsec:ModelFormulation:SIR}.  As a part of that discussion, we discuss specific formulations of the SIR model for discrete and continuous time.  The SIR model is the foundation for many of the other models that have been used for infectious disease.  In the following three Subsections, we discuss modifications to the basic SIR model that have been proposed to address the remaining factors that we outlined in Section \ref{sec:Intro} describing the model formulation.  Specifically, we discuss the spatial scale in Subsection \ref{subsec:ModelFormulation:SpatialScale}, the number of serotypes in Subsection \ref{subsec:ModelFormulation:NumberOfSerotypes}, and the measurement process in Subsection \ref{subsec:ModelFormulation:MeasurementProcess}.
 
-One approach is to manipulate the equations of the compartmental model so as to obtain an approximately linear form in the observed model quantities, and then use locally linear regression techniques such as local regression or splines.
+\subsection{SIR Model}
+\label{subsec:ModelFormulation:SIR}
+
+In this Section, we give an overview of the SIR model and discuss its most common formulations in discrete and continuous time.  In this model, at each point in time each individual in the population is categorized as either susceptible to the disease, infected with the disease, or recovered from the disease.  The model tracks the total number of individuals in each disease status category, and allows for either deterministic or stochastic changes in these population totals over time.
+
+\lboxit{
+To do:
+\begin{itemize}
+\item Diagram of SIR
+\item Diagrams of common minor extensions still operating on one geographical unit and one serotype -- SEIR, births, etc.
+\item Define/distinguish between discrete and continuous time models, say these will be discussed in Subsections 
+\item cite \cite{keeling2008modelingInfectiousDiseases}
+\end{itemize}
+}
+
+\subsubsection{Discrete Time Formulation of the SIR Model}
+\label{subsubsec:ModelFormulation:SIR:DiscreteTime}
+
+\lboxit{
+To do:
+\begin{itemize}
+\item everything
+\item justify form of equation for I and discuss alternatives
+\item cite \cite{finkenstadt2000TimeSeriesDiseasesDynamicalSystems}
+\end{itemize}
+}
 
 \cite{finkenstadt2000TimeSeriesDiseasesDynamicalSystems} model transmission of measles and base their work on the SEIR model.  This model has four components: \textbf{S}usceptible, \textbf{E}xposed, \textbf{I}nfected, and \textbf{R}ecovered.  The assumed transitions between these categories are shown in Figure~\ref{fig:FinkenstadtGrenfell2000SEIRDynamics}, which reproduces Figure 1 from their work.  They use the following set of equations to model the infected and susceptible populations over time:
 \begin{align}
@@ -83,9 +121,6 @@ S_t = B_{t - d} + S_{t - 1} - I_t + u_t \label{eqn:FinkenstadtGrenfell2000St}
 \end{align}
 The model works with data aggregated to a biweekly scale, and previous work indicates that it takes 2 weeks for an infected individual to recover from measles.  This means that (by assumption), all infected individuals at time $t - 1$ are recovered at time $t$.  The authors also incorporate a mechanism for underreporting of the number of infected individuals at each time point, with a time-varying reporting rate.
 
-\lboxit{
-The justification for the particular functional form used in Equation~\eqref{eqn:FinkenstadtGrenfell2000It} is unclear to me.  Is there a way to investigate whether this functional form is reasonable or correct?  See references Liu et al. 1987 and Fine and Clarkson 1982 for discussion?
-}
 
 \begin{figure}
 \includegraphics[width=\textwidth]{images/FinkenstadtGrenfell2000/SEIRDynamics.png} 
@@ -93,20 +128,113 @@ The justification for the particular functional form used in Equation~\eqref{eqn
 \label{fig:FinkenstadtGrenfell2000SEIRDynamics}
 \end{figure}
 
+
+\subsubsection{Continuous Time Formulation of the SIR Model}
+\label{subsubsec:ModelFormulation:SIR:ContinuousTime}
+
+\lboxit{
+To do:
+\begin{itemize}
+\item everything
+\item cite \cite{word2010estimationSeasonalTransmissionContinuousTime, word2012nonlinearProgrammingTransmissionParametersContinuousTime}
+\end{itemize}
+}
+
+\subsection{Spatial Scale}
+\label{subsec:ModelFormulation:SpatialScale}
+
+\lboxit{
+To do:
+\begin{itemize}
+\item think about the name of this section?  I think what I want is number of geographic units modeled, not the size of those units.
+\item find and discuss papers about this?
+\end{itemize}
+}
+
+\subsection{Number of Serotypes}
+\label{subsec:ModelFormulation:NumberOfSerotypes}
+
+\lboxit{
+To do:
+\begin{itemize}
+\item everything
+\item cite \cite{shrestha2011MultiPathogen, reich2013DengueSerotypeInteractionsCrossImmunity}
+\end{itemize}
+}
+
+\subsection{Measurement Process}
+\label{subsec:ModelFormulation:MeasurementProcess}
+
+\lboxit{
+To do:
+\begin{itemize}
+\item everything
+\item underreporting -- cite \cite{finkenstadt2000TimeSeriesDiseasesDynamicalSystems}, Krzysztof?
+\end{itemize}
+}
+
+\section{Estimation}
+\label{sec:Estimation}
+
+In this Section, we describe estimation strategies for the SIR and related models.  We discuss two-stage estimation procedures in Subsection~\ref{subsec:Estimation:TwoStage}, nonlinear programming in Subsection~\ref{subsec:Estimation:NonlinearProgramming}, sequential Monte Carlo in Subsection~\ref{subsec:Estimation:SequentialMonteCarlo}, 
+
+\subsection{Two-Stage Estimation}
+\label{subsec:Estimation:TwoStage}
+
 In order to perform estimation, \cite{finkenstadt2000TimeSeriesDiseasesDynamicalSystems} use a two-step process:
 \begin{enumerate}
 \item First, they use Equation \eqref{eqn:FinkenstadtGrenfell2000St} to obtain an estimate of the deviations of the size of the susceptible population from its long-term mean at each time point.  This step works by rearranging Equation~\eqref{eqn:FinkenstadtGrenfell2000St} to express the cumulative births at each time point as a function of the cumulative observed cases, deviations in the reporting rate from the overall average reporting rate, deviations of the size of the susceptible population at time $t$ from its overall mean, and a random noise term.  They then use locally linear regression to approximate this function locally in $t$.  The terms in this approximation do not uniquely identify all of the quantities in the model; in particular, they use the residuals from this regression as estimates of the desired deviations, but it appears that the deviations of the the size of the susceptible population from their overall mean are conflated with the random noise term.  This would mean that the estimates used are valid only when the random noise term is approximately $0$ (or has very low variance).
 \item Second, they combine the estimated deviations from step 1 with Equation \eqref{eqn:FinkenstadtGrenfell2000It} to estimate the parameters governing infection dynamics over time.
 \end{enumerate}
 
+In addition to merging together the noise term with fluctuations in the state variable (perhaps inevitable?), it seems like this method loses track of uncertainty and possibly introduces bias by using a single value for the size of the state variable rather than integrating over its distribution?
 
-\section{Estimation}
-\label{sec:Estimation}
+\subsection{Nonlinear Programming (may rename this?)}
+\label{subsec:Estimation:NonlinearProgramming}
+
+\lboxit{
+To do:
+\begin{itemize}
+\item everything
+\item cite \cite{word2010estimationSeasonalTransmissionContinuousTime, word2012nonlinearProgrammingTransmissionParametersContinuousTime}
+\end{itemize}
+}
+
+\subsection{Sequential Monte Carlo}
+\label{subsec:Estimation:SequentialMonteCarlo}
+
+\lboxit{
+To do:
+\begin{itemize}
+\item everything
+\item cite \cite{ionides2006inferenceNonlinearDynamicalSystems, shrestha2011MultiPathogen} (?)
+\end{itemize}
+}
+
+\subsection{Maximum Likelihood MCMC}
+\label{subsec:Estimation:MLMCMC}
+
+\lboxit{
+To do:
+\begin{itemize}
+\item Read \cite{geyer1992constrainedMCML}, Section 5 of http://www.jstatsoft.org/v24/i03/paper and http://arxiv.org/abs/1208.0121
+\item Decide if it's worth including this method in this review; if so, write it up.
+\end{itemize}
+}
+
+\subsection{Estimation of Splines used to Represent Dynamic Process}
+\label{subsec:Estimation:Splines}
+
+\lboxit{
+To do:
+\begin{itemize}
+\item Rename this Subsection?
+\item Discuss \cite{xun2013PDEEstimation} (and references it contains?)
+\end{itemize}
+}
 
 
 
-%\bibliographystyle{plainnat}
-%\bibstyle{agsm}
 \bibliographystyle{Chicago}
 
 \bibliography{MID}
