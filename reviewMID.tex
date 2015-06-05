@@ -90,7 +90,24 @@ In this Section we discuss variations that have been proposed for compartmental 
 \subsection{SIR Model}
 \label{subsec:ModelFormulation:SIR}
 
-In this Section, we give an overview of the SIR model and discuss its most common formulations in discrete and continuous time.  In this model, at each point in time each individual in the population is categorized as either susceptible to the disease, infected with the disease, or recovered from the disease.  The model tracks the total number of individuals in each disease status category, and allows for either deterministic or stochastic changes in these population totals over time.
+In this Section, we give an overview of the SIR model and discuss its most common formulations in discrete and continuous time.  In this model, at each point in time each individual in the population is categorized as either susceptible to the disease, infected with the disease, or recovered from the disease.  The model tracks either the total number of individuals or proportion of the population in each disease status category, and allows for either deterministic or stochastic changes in these population totals or proportions over time.  The model is illustrated in Figure \ref{fig:SIRBasic}.
+
+\begin{figure}
+\includegraphics[width=\textwidth]{images/SIRDiagrams/SIRBasic.pdf}
+\caption{A diagram of the basic SIR model: individuals move from susceptible to infected to recovered.}
+\label{fig:SIRBasic}
+\end{figure}
+
+Following \cite{keeling2008modelingInfectiousDiseases}, we use the following notation:
+\begin{itemize}
+\item $X = X(t) = $ number of susceptible individuals at each point in time
+\item $Y = Y(t) = $ number of infected individuals at each point in time
+\item $N = N(t) = $ total population size at each point in time
+\item $S = S(t) = X(t) / N(t) =$ proportion of the population who are susceptible at each point in time
+\item $I = I(t) = Y(t) / N(t) =$ proportion of the population who are infected at each point in time
+\end{itemize}
+The proportion of the population who have recovered from an infection at time $t$ is $1 - S(t) - I(t)$.
+
 
 \lboxit{
 To do:
@@ -101,6 +118,8 @@ To do:
 \item cite \cite{keeling2008modelingInfectiousDiseases}
 \end{itemize}
 }
+
+
 
 \subsubsection{Discrete Time Formulation of the SIR Model}
 \label{subsubsec:ModelFormulation:SIR:DiscreteTime}
@@ -131,6 +150,94 @@ The model works with data aggregated to a biweekly scale, and previous work indi
 
 \subsubsection{Continuous Time Formulation of the SIR Model}
 \label{subsubsec:ModelFormulation:SIR:ContinuousTime}
+
+In continuous time, the SIR model consists of a system of (stochastic) differential equations specifying the rate of change of the quantities S and I as a function of their current values and some unknown parameters.  There are two commonly used formulations with different infection rates, based on different assumptions: frequency-dependent transmission and density-dependent transmission.  We begin with a discussion of frequency-dependent transmission, and then turn to density-dependent transmission.
+
+The frequency-dependent transmission structure can be obtained by making the following assumptions:
+\begin{enumerate}
+\item \textbf{Homogeneous mixing}: All individuals in the population contact each other with equal probability \label{assumption:SIRmixing}
+\item \textbf{Homogeneous contact rate}: The rate of contacts with other individuals is constant across individuals and time \label{assumption:SIRcontactrate}
+\item \textbf{Homogeneous transmission probability:} The probability of transmission of the disease from infected individuals to susceptible individuals per contact is constant across individuals and over time \label{assumption:SIRtransmissionrate}
+\item \textbf{Independence of disease transmission}: Transmission of the disease from different contacts is independent. \label{assumption:SIRtransmissionsindependent}
+\end{enumerate}
+
+Under these assumptions, we can derive the rate at which individuals move from the susceptible population to the infected population in a deterministic model of the disease dynamics.  Our discussion follows that in \cite{keeling2008modelingInfectiousDiseases} closely.  We begin by setting $\kappa$ equal to the number of contacts per unit time that each individual experiences; this quantity is constant across individuals and time according to Assumption \ref{assumption:SIRcontactrate} above.  We next set $c$ equal to the probability of disease transmission to a susceptible individual following a single contact; this quantity is constant across individuals and time according to Assumption \ref{assumption:SIRtransmissionrate}.
+
+Our overall strategy for finding $\frac{d S(t)}{d t}$ follows four steps:
+\begin{enumerate}
+\item First, we find the probability $\rho_\delta$ that one particular susceptible individual becomes infected over a short time interval $[t^*, t^* + \delta]$.
+\item Second, we extend this probability to the population of all susceptible individuals at time $t^*$ to obtain an expected change in the number of infected individuals over the given time interval.
+\item Third, we divide this expected change in the number of infected individuals by the width of the time interval to obtain an expected average rate of change in the number of infected individuals per unit time over the given time interval.
+\item Finally, we let the width $\delta$ of the time interval go to $0$ to obtain the expected instantaneous rate of change in the number of infected individuals at the time $t^*$.
+\end{enumerate}
+
+Let $\mathcal{S}_{t^*}$ be the set of all susceptible individuals at time $t^*$, which has cardinality $X(t^*)$.  For each individual $i \in \mathcal{S}_{t^*}$, let
+\begin{align*}
+Z_{i, t^*, \delta} = \begin{cases} 0 \text{ if individual $i$ is still uninfected at time $t^* + \delta$}, \\ 1 \text{ if individual $i$ is infected at time $t^* + \delta$.} \end{cases}
+\end{align*}
+
+We are interested in finding $E(Z_{i, t^*, \delta}) = P(Z_{i, t^*, \delta} = 1)$.  As a preliminary computation, we find the number of contacts with infected individuals that a susceptible individual engages in during the specified time interval from $t^*$ to $t^* + \delta$:
+\begin{align*}
+&\kappa \, \frac{\text{contacts}}{\text{unit time}} \, \times \, \delta \, \text{units of time} \, \times \\
+&\qquad \{I(t^*) + \varepsilon(t^*, \delta)\} \, \frac{\text{contacts with infected individuals}}{\text{contact}}
+\end{align*}
+This computation makes use of assumption \ref{assumption:SIRmixing} above to obtain the third term equating the proportion of the population who are infected with the number of contacts with infected individuals per contact.  The error $\varepsilon(t^*, \delta)$ is an adjustment for the fact that the proportion of the population who are infected does not remain constant over the whole time span from $t^*$ to $t^* + \delta$.
+
+Suppose that the number of contacts with infected individuals, $\delta \kappa \{ I(t^*) + \varepsilon(t^*, \delta) \}$, is an integer.  Then by the independence of Assumption \ref{assumption:SIRtransmissionsindependent}, we can calculate
+\begin{align}
+&P(Z_{i, t^*, \delta} = 0) = P(\text{Individual $i$ not infected after $\delta \kappa \{ I(t^*) + \varepsilon(t^*, \delta) \}$} \nonumber \\
+&\qquad \qquad \qquad \qquad \qquad \qquad \text{contacts with infected individuals}) \nonumber \\
+&\qquad = \prod_{k = 1}^{\delta \kappa \{ I(t^*) + \varepsilon(t^*, \delta) \}} P(\text{Individual $i$ not infected after $k$th } \nonumber \\
+&\qquad \qquad \qquad \qquad \qquad \qquad \text{contact with infected individual}) \nonumber \\
+&\qquad = \prod_{k = 1}^{\delta \kappa \{ I(t^*) + \varepsilon(t^*, \delta) \}} (1 - c) \nonumber \\
+&\qquad = (1 - c)^{\delta \kappa \{ I(t^*) + \varepsilon(t^*, \delta) \}} \label{eqn:SIRProbZeq1Intermediate}
+\end{align}
+By analogy with the integer case, we also use the result in Equation \eqref{eqn:SIRProbZeq1Intermediate} if $\delta \kappa \{ I(t^*) + \varepsilon(t^*, \delta) \}$ is non-integer.  This is intuitively plausible, but disagrees with the results we might get if we were a little more careful about thinking about randomness.  We return to this issue later.
+
+Now we define $\beta = -\kappa log(1 - c)$.  Then, continuing from Equation \eqref{eqn:SIRProbZeq1Intermediate}, we have
+\begin{align}
+&P(Z_{i, t^*, \delta} = 0) = \left\{ (1 - c)^{\kappa} \right\}^{\delta \{ I(t^*) + \varepsilon(t^*, \delta) \}} \nonumber \\
+&\qquad = \left\{ \exp(- \beta) \right\}^{\delta \{ I(t^*) + \varepsilon(t^*, \delta) \}} \nonumber \\
+&\qquad = \exp \left[ - \beta \delta \{ I(t^*) + \varepsilon(t^*, \delta) \} \right] \label{eqn:SIRProbZeq1Beta}
+\end{align}
+This concludes step 1 of the derivation.
+
+For step 2, we note that the total number of susceptible individuals at time $t^*$ who are infected by time $t^* + \delta$ is given by $\sum_{i \in \mathcal{S}_t^*} Z_{i, t^*, \delta}$.  Thus, the expected number of susceptible individuals who become infected by time $t^* + \delta$ is
+\begin{align*}
+&E\left(\sum_{i \in \mathcal{S}_t^*} Z_{i, t^*, \delta}\right) = \sum_{i \in \mathcal{S}_t^*} E(Z_{i, t^*, \delta}) \\
+&\qquad = \sum_{i \in \mathcal{S}_t^*} P(Z_{i, t^*, \delta} = 1) \\
+&\qquad = \sum_{i \in \mathcal{S}_t^*} \{ 1 - P(Z_{i, t^*, \delta} = 0) \} \\
+&\qquad = \sum_{i \in \mathcal{S}_t^*} [ 1 - \exp \left[ - \beta \delta \{s I(t^*) + \varepsilon(t^*, \delta) \} \right] ] \\
+&\qquad = X(t^*) \left[ 1 - \exp \left[ - \beta \delta \{ I(t^*) + \varepsilon(t^*, \delta) \} \right] \right]
+\end{align*}
+
+For step 3, we divide this expected change in the number of infected individuals by the width of the time interval to obtain an expected average rate of change in the number of infected individuals per unit time over the given time interval:
+\begin{align}
+\frac{X(t^*) \left[ 1 - \exp \left[ - \beta \delta \{ I(t^*) + \varepsilon(t^*, \delta) \} \right] \right]}{\delta} \label{eqn:SIRExpectedAverageRateChange}
+\end{align}
+
+For step 4, we take the limit of \eqref{eqn:SIRExpectedAverageRateChange} as the interval width $\delta$ goes to 0:
+\begin{align*}
+&\lim_{\delta \rightarrow 0} \frac{X(t^*) \left[ 1 - \exp \left[ - \beta \delta \{ I(t^*) + \varepsilon(t^*, \delta) \} \right] \right]}{\delta} \\
+&\qquad = \lim_{\delta \rightarrow 0} \frac{X(t^*) \left[ 1 - \sum_{k = 0}^{\infty} \left[ - \beta \delta \{ I(t^*) + \varepsilon(t^*, \delta) \} \right]^k / k ! \right]}{\delta} \\
+&\qquad = \lim_{\delta \rightarrow 0} \frac{X(t^*) \left[ - \beta \delta \{ I(t^*) + \varepsilon(t^*, \delta) \} - \sum_{k = 2}^{\infty} \left[ - \beta \delta \{ I(t^*) + \varepsilon(t^*, \delta) \} \right]^k / k ! \right]}{\delta} \\
+\end{align*}
+If $\varepsilon(t^*, \delta) \in o(\delta)$, in the limit we obtain 
+\begin{align*}
+- \beta X(t^*) I(t^*) = \frac{- \beta X(t^*) Y(t^*)}{N(t^*)}
+\end{align*}
+
+%Setting $Z = $ the number of susceptible individuals at time $t^*$ who are infected at time $t^* + \delta$, we can %write
+%\begin{align}
+%&Z = \sum_{i = 1}^{X(t^*)} \ind_{\{\text{individual $i$ is infected at time $t^* + \delta$ | individual $i$ is susceptible at time $t^*$}\}} \\
+%&\qquad = \
+%\end{align}
+
+,  By assumption \ref{assumption:SIRtransmissionsindependent}, the expected number of susceptible individuals who become infected over that time interval is that probability times $X(t^*)$
+
+We consider the probability
+
+
 
 \lboxit{
 To do:
